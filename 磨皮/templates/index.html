@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>本地照片处理工具</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>本地照片处理工具11</h1>
+        
+        <!-- 上传区域 -->
+        <div class="upload-section">
+            <input type="file" id="file-upload" accept="image/*">
+            <button id="upload-btn">上传照片</button>
+            <p id="upload-status"></p>
+        </div>
+        
+        <!-- 处理控制区域 -->
+        <div class="control-section" id="control-panel" style="display: none;">
+            <!-- 磨皮控制 -->
+            <div class="control-group">
+                <label>磨皮强度 (1-10档):</label>
+                <input type="range" id="smooth-slider" min="1" max="10" value="1">
+                <span id="smooth-value">1</span>
+            </div>
+            
+            <!-- 美白控制 -->
+            <div class="control-group">
+                <label>美白强度 (1-10档):</label>
+                <input type="range" id="bright-slider" min="1" max="10" value="1">
+                <span id="bright-value">1</span>
+            </div>
+            
+            <!-- 去水印区域选择 -->
+            <div class="control-group">
+                <label>去水印区域:</label>
+                <button id="select-area-btn">选择去水印区域</button>
+                <p id="area-status">未选择区域</p>
+            </div>
+            
+            <!-- 操作按钮 -->
+            <div class="btn-group">
+                <button id="process-btn">开始处理111</button>
+                <button id="download-btn">下载处理后图片</button>
+            </div>
+        </div>
+        
+        <!-- 预览对比区域 -->
+        <div class="preview-section" id="preview-panel" style="display: none;">
+            <div class="preview-container">
+                <div class="preview-item">
+                    <h3>处理前</h3>
+                    <div class="image-container" id="original-image-container">
+                        <img id="original-image" alt="处理前图片">
+                    </div>
+                </div>
+                <div class="preview-item">
+                    <h3>处理后</h3>
+                    <div class="image-container" id="processed-image-container">
+                        <img id="processed-image" alt="处理后图片">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 区域选择遮罩 -->
+        <div id="area-selector" style="display: none;">
+            <div id="selector-overlay"></div>
+            <div id="selection-box" style="display: none;"></div>
+            <button id="confirm-area-btn">确认选择</button>
+            <button id="cancel-area-btn">取消</button>
+        </div>
+    </div>
+
+    <script src="/static/js/script.js"></script>
+</body>
+</html>
