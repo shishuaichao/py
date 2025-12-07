@@ -2,12 +2,22 @@ import os
 import cv2
 import numpy as np
 from PIL import Image, ImageEnhance
-from flask import Flask, render_template, request, jsonify, send_file
+from flask import Flask, render_template, request, jsonify, send_file, redirect, url_for
+# 完整导入所需函数
 import io
 import uuid
 
-app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'static/uploads'
+# app = Flask(__name__)
+# 1. 配置模板目录为src，静态目录保持默认
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+app = Flask(
+    __name__,
+    template_folder=os.path.join(BASE_DIR, 'src'),  # 模板目录：src（找 index.html）
+    static_folder=os.path.join(BASE_DIR, 'src'),    # 静态目录：src（找 css/js）
+    static_url_path=''                          # 前端访问静态资源的 URL 前缀（可选，建议配）
+)
+
+app.config['UPLOAD_FOLDER'] = 'assets/uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 最大上传16MB
 app.config['TEMPLATES_AUTO_RELOAD'] = True  # 模板自动重载
 
@@ -18,8 +28,22 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 image_cache = {}
 
 @app.route('/')
-def index():
+def home():
     return render_template('index.html')
+@app.route('/hello')
+def hello():
+    return render_template('hello.html')
+# --- 404 错误处理器（核心配置）---
+@app.route('/404')
+def show_404_page():
+    # 必须返回 404 状态码，符合 HTTP 规范
+    return render_template('404.html'), 404
+
+# 2. 全局 404 错误处理器：捕获所有无效路由，重定向到 /404
+@app.errorhandler(404)
+def handle_404(error):
+    # 重定向到 /404 路由（URL 会变成 /404）
+    return render_template('404.html'), 404
 
 @app.route('/upload', methods=['POST'])
 def upload_image():
