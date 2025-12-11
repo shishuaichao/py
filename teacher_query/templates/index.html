@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>任课老师查询</title>
+    <style>
+        /* 极简样式，方便查看 */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+        }
+        table {
+            border-collapse: collapse;
+            margin-top: 20px;
+            width: 600px;
+        }
+        th, td {
+            border: 1px solid #333;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <h1>任课老师查询</h1>
+    <!-- 点击查询按钮（实际刷新页面即可触发查询） -->
+    <button onclick="window.location.reload()">查询任课老师</button>
+    
+    <!-- 展示查询结果 -->
+    <div>
+        <h3>查询结果：</h3>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>老师姓名</th>
+                <th>任课科目</th>
+                <th>授课班级</th>
+            </tr>
+            <!-- 遍历后端传递的老师数据 -->
+            {% for teacher in teachers %}
+            <tr>
+                <td>{{ teacher.id }}</td>
+                <td>{{ teacher.name }}</td>
+                <td>{{ teacher.subject }}</td>
+                <td>{{ teacher.class_name }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</body>
+</html>
