@@ -26,6 +26,12 @@
             position: relative;
             /* 确保视口稳定 */
         }
+        html {
+            /* height: 50% */
+        }
+        body {
+            padding: 50px 0;
+        }
 
         /* 1. 顶部固定导航栏（50px） */
         .header {
@@ -87,7 +93,7 @@
 
         /* 2. 底部固定输入框（50px） */
         .footer {
-            position: fixed;
+            position: absolute;
             bottom: 0;
             left: 0;
             right: 0;
@@ -177,12 +183,13 @@
 
         // 监听窗口大小变化（iOS 键盘弹起/收起会触发）
         window.addEventListener('resize', () => {
+            // alert('resize')
             const currentHeight = window.innerHeight;
             // 键盘弹起：窗口高度变小，强制修正定位
             if (currentHeight < originalWindowHeight) {
                 // 强制顶部导航固定
-                document.querySelector('.header').style.position = 'fixed';
-                document.querySelector('.header').style.top = '0';
+                // document.querySelector('.header').style.position = 'fixed';
+                // document.querySelector('.header').style.top = '0';
                 // 强制底部输入框固定
                 document.querySelector('.footer').style.position = 'fixed';
                 document.querySelector('.footer').style.bottom = '0';
@@ -199,6 +206,7 @@
 
         // 输入框聚焦：阻止页面自动滚动，强制固定栏不偏移
         msgInput.addEventListener('focus', () => {
+            console.log('focus')
             // 禁用页面滚动（iOS 防偏移）
             document.body.scrollTop = 0;
             document.documentElement.scrollTop = 0;
