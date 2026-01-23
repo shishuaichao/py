@@ -8,7 +8,7 @@ def add_wechat(d):
         conn = pymysql.connect(**MYSQL_CONFIG)
         cursor = conn.cursor()
         # 执行插入SQL
-        cursor.execute('INSERT INTO wechat (id, nickname, content, type, time) VALUES (%s, %s, %s, %s, %s)', (d['id'], d['nickname'], d['content'], d['type'], d['time']))
+        cursor.execute('INSERT INTO wechat (id, nickname, avatar, content, type, time) VALUES (%s, %s, %s, %s, %s, %s)', (d['id'], d['nickname'], d['avatar'], d['content'], d['type'], d['time']))
         conn.commit()  # 写操作必须commit
         print("新增聊天成功！")
     except Exception as e:

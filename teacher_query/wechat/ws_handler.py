@@ -20,6 +20,7 @@ def handle_socket_msg(msgObj):
         'id': msgObj['id'],
         'nickname': msgObj['nickname'],
         "content": msgObj['content'], 
+        "avatar": msgObj['avatar'], 
         "type": "message", 
         "time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") 
     }
