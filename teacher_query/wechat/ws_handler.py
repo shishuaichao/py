@@ -33,7 +33,7 @@ def handle_socket_system_msg(msgObj):
     msgData = { 
         'id': msgObj['id'],
         'nickname': msgObj['nickname'],
-        "content": '系统消息：' + msgObj['content'], 
+        "content": msgObj['content'], 
         "type": "system_msg", 
         "time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") 
     }
@@ -84,7 +84,6 @@ def handle_disconnect():
 @socketio.on('set_nickname')
 def handle_set_nickname(userInfo):
     nickname = userInfo['nickname'].strip()
-    print('x-------', nickname)
     sid = request.sid
     # 步骤1：验证用户名（非空、不重复，可选）
     if not nickname:
@@ -104,7 +103,7 @@ def handle_set_nickname(userInfo):
         'nickname': nickname,
         'content': f'用户「{nickname}」已加入聊天室',
         'type': 'system_msg',
-        'time': datetime.now().strftime('%H:%M:%S')
+        'time': datetime.datetime.now().strftime('%H:%M:%S')
     }
     add_wechat(msgData)
     emit('system_msg', msgData, broadcast=True)  # 广播给所有客户端

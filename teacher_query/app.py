@@ -18,6 +18,12 @@ def get_chats():
     res = get_all_wechats()
     return jsonify(res)
 
+@app.route('/', methods=['GET'])
+def get_index():
+    return render_template('index.html')
+
+
+
 if __name__ == '__main__':
     socketio.run(app, host='172.20.10.2', port=5000, debug=True)
 
