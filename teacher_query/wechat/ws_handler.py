@@ -79,7 +79,10 @@ def handle_disconnect():
             }, room=user_info['room'])
         # 群发在线人数更新
         emit('online_count', len(online_users), broadcast=True)
-        print(f"❌ 客户端 {sid}（{user_info['nickname']}）断开连接")
+        print(f"❌ 客户端 {sid}（）断开连接")
+        print(f"❌ 客户端 {user_map}（）断开连接")
+        print(f"用户 {user_map[sid]} 退出房间")
+        emit('system_msg', { 'content': f"用户 {user_map[sid]} 退出房间" }, broadcast=True)
 
 # 2. 核心：监听前端传过来的用户名并存储
 @socketio.on('set_nickname')
@@ -107,4 +110,4 @@ def handle_set_nickname(userInfo):
         'time': datetime.datetime.now().strftime('%H:%M:%S')
     }
     add_wechat(msgData)
-    emit('system_msg', msgData, broadcast=True)  # 广播给所有客户端
+    # emit('system_msg', msgData, broadcast=True)  # 广播给所有客户端
