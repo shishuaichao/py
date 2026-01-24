@@ -5,7 +5,16 @@ import datetime
 
 # 普通消息处理函数
 def treat_socket_message(msgObj):
-    # print(f'WS收到：{msgObj}')
+    msg = msgObj['content']
+    if msg.startswith("群通告~~"):
+        msgData = { 
+            "content": msgObj['content'].replace("群通告~~", ""), 
+            "type": "system_msg", 
+            "time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") 
+        }
+        add_chat(msgData)
+        emit('system_msg', msgData, broadcast=True)
+        return
     msgData = { 
         'id': msgObj['id'],
         'nickname': msgObj['nickname'],
