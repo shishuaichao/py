@@ -1,113 +1,60 @@
 from flask_socketio import SocketIO, emit
-import time
-from wechat.operate import get_all_wechats, add_wechat
+from wechat.operate import add_chat
 import datetime
-from flask import Flask, jsonify, request, session
+from flask import request
+from wechat.ws_utils import treat_socket_message, treat_socket_system_msg
 
 # 初始化socketio（空初始化，后续在app.py中绑定app）
 socketio = SocketIO()
 
-# 存储在线用户：{sid: {nickname: str, room: str}}
-online_users = {}
-# 核心存储：{sid: 用户名}，全局字典
+# 核心存储：{sid: nickname}，全局字典
 user_map = {}
 
-# WebSocket消息处理函数
-@socketio.on('message')
-def handle_socket_msg(msgObj):
-    print(f'WS收到：{msgObj}')
-    msgData = { 
-        'id': msgObj['id'],
-        'nickname': msgObj['nickname'],
-        "content": msgObj['content'], 
-        "avatar": msgObj['avatar'], 
-        "type": "message", 
-        "time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") 
-    }
-    add_wechat(msgData)
-    emit('message', msgData, broadcast=True)
-
-# WebSocket消息处理函数
-@socketio.on('system_msg')
-def handle_socket_system_msg(msgObj):
-    print(f'WS收到：{msgObj}')
-    msgData = { 
-        'id': msgObj['id'],
-        'nickname': msgObj['nickname'],
-        "content": msgObj['content'], 
-        "type": "system_msg", 
-        "time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") 
-    }
-    # add_wechat(msgData)
-    emit('system_msg', msgData, broadcast=True)
-
-# 处理客户端连接事件
+# 客户端连接
 @socketio.on('connect')
 def handle_connect():
-    """客户端连接成功时触发"""
     sid = request.sid  # 获取客户端唯一标识（flask-socketio 内置）
-    # 初始化用户信息（默认昵称 + 未加入房间）
-    print(f"sid: {sid}")
-
-    online_users[sid] = {
-        'nickname': f'访客{sid}',
-        'room': None
-    }
-    print(f"✅ 客户端 {sid} 连接成功，默认昵称：{online_users[sid]['nickname']}")
+    user_map[sid] = ''
+    print(f"✅连接成功 {sid} ，当前在线人数：{len(user_map)}")
     # 给当前客户端发送连接成功提示
-    emit('connect_success', {
-        'msg': '连接成功！',
-        'nickname': online_users[sid]['nickname'],
-        'online_count': len(online_users)
-    })
-    # 群发在线人数更新
-    emit('online_count', len(online_users), broadcast=True)
+    emit('connect_success', sid)
+    # 群发在线人数更新  
+    emit('online_count', len(user_map), broadcast=True)
 
-# 8. Socket.IO 事件：客户端断开连接
+# Socket.IO 事件：客户端断开连接
 @socketio.on('disconnect')
 def handle_disconnect():
     sid = request.sid
-    if sid in online_users:
-        user_info = online_users[sid]
+    if sid in user_map:
+        # 通知所有客户端该用户已退出
+        emit('system_msg', { 'content': f"{user_map[sid]} 退出聊天" }, broadcast=True)
+        # 群发在线人数更新  
+        emit('online_count', len(user_map), broadcast=True)
+        print(f"❌断开连接（{user_map[sid]}），当前在线人数：{len(user_map)}")
         # 移除用户
-        del online_users[sid]
-        # 群发离开通知（如果在房间内）
-        if user_info['room']:
-            emit('system_msg', {
-                'msg': f'{user_info["nickname"]} 离开房间 {user_info["room"]}',
-                'time': datetime.now().strftime('%H:%M:%S')
-            }, room=user_info['room'])
-        # 群发在线人数更新
-        emit('online_count', len(online_users), broadcast=True)
-        print(f"❌ 客户端 {sid}（）断开连接")
-        print(f"❌ 客户端 {user_map}（）断开连接")
-        print(f"用户 {user_map[sid]} 退出房间")
-        emit('system_msg', { 'content': f"用户 {user_map[sid]} 退出房间" }, broadcast=True)
+        del user_map[sid]
 
-# 2. 核心：监听前端传过来的用户名并存储
+# 核心：监听前端传过来的用户名并存储
 @socketio.on('set_nickname')
 def handle_set_nickname(userInfo):
-    nickname = userInfo['nickname'].strip()
     sid = request.sid
-    # 步骤1：验证用户名（非空、不重复，可选）
-    if not nickname:
-        emit('username_error', {'msg': '用户名不能为空！'})
-        return
-    if nickname in user_map.values():
-        emit('username_error', {'msg': '用户名已被占用，请换一个！'})
-        return
-    # 步骤2：存储用户名（sid 作为键，确保唯一）
-    user_map[sid] = nickname
-    print(f"客户端 {sid} 设置用户名：{nickname}")
-    # 步骤3：给当前客户端返回成功提示
-    emit('username_success', {'msg': f'用户名设置成功：{nickname}'})
-    # 步骤4：群发「新用户加入」通知（所有客户端可见）
+    nickname = userInfo['nickname']
+    user_map[sid] = nickname    
     msgData = {
-        'id': userInfo['id'],
-        'nickname': nickname,
-        'content': f'用户「{nickname}」已加入聊天室',
+        'content': f'{nickname} 已加入聊天室',
         'type': 'system_msg',
-        'time': datetime.datetime.now().strftime('%H:%M:%S')
+        'time': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") 
     }
-    add_wechat(msgData)
-    # emit('system_msg', msgData, broadcast=True)  # 广播给所有客户端
+    print(msgData)
+    add_chat(msgData)
+    emit('system_msg', msgData, broadcast=True)  # 广播给所有客户端
+
+# 普通消息
+@socketio.on('message')
+def handle_socket_message(msgObj):
+    treat_socket_message(msgObj)
+
+# 系统消息
+@socketio.on('system_msg')
+def handle_socket_system_msg(msgObj):
+    treat_socket_system_msg(msgObj)
