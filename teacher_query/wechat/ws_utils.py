@@ -6,9 +6,9 @@ import datetime
 # 普通消息处理函数
 def treat_socket_message(msgObj):
     msg = msgObj['content']
-    if msg.startswith("群通告~~"):
+    if msg.startswith("群公告~~"):
         msgData = { 
-            "content": msgObj['content'].replace("群通告~~", ""), 
+            "content": msgObj['content'].replace("群公告~~", ""), 
             "type": "system_msg", 
             "time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") 
         }
